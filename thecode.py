@@ -439,7 +439,7 @@ class ThirdWindow:
                 prediction = self.predict_random_forest(mydata)
             elif self.selected_option.get() == "Knn":
                 prediction = self.predict_Knn(mydata)
-            messagebox.showinfo("Prediction", f"Prediction: {prediction}")
+            messagebox.showinfo("Prediction", f"Prediction: {int(prediction[0])}")
         else:
             messagebox.showerror("Error", "Please select one option.")
 

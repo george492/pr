@@ -91,11 +91,11 @@ dt_grid_search.fit(X_train_scaled, y_train)
 best_dt_params = dt_grid_search.best_params_
 '''
 # Model with best hyperparameters
-best_dt_classifier = DecisionTreeClassifier(max_depth=40, criterion='entropy', min_samples_split=2, min_samples_leaf=1, random_state=42)
-best_dt_classifier.fit(X_train_scaled, y_train)
+dt_classifier = DecisionTreeClassifier(max_depth=40, criterion='entropy', min_samples_split=2, min_samples_leaf=1, random_state=42)
+dt_classifier.fit(X_train_scaled, y_train)
 
 # Predictions
-dt_y_pred = best_dt_classifier.predict(X_test_scaled)
+dt_y_pred = dt_classifier.predict(X_test_scaled)
 
 # Evaluating the model
 dt_accuracy = accuracy_score(y_test, dt_y_pred)
@@ -121,11 +121,11 @@ rf_grid_search.fit(X_train_scaled, y_train)
 best_rf_params = rf_grid_search.best_params_
 '''
 # Model with best hyperparameters
-best_rf_classifier = RandomForestClassifier(n_estimators=1400, max_depth=20, min_samples_split=2, min_samples_leaf=2, class_weight='balanced', criterion='gini', bootstrap=False, random_state=42)
-best_rf_classifier.fit(X_train_scaled, y_train)
+rf_classifier = RandomForestClassifier(n_estimators=1400, max_depth=20, min_samples_split=2, min_samples_leaf=2, class_weight='balanced', criterion='gini', bootstrap=False, random_state=42)
+rf_classifier.fit(X_train_scaled, y_train)
 
 # Predictions
-rf_y_pred = best_rf_classifier.predict(X_test_scaled)  # Use X_test_scaled instead of X_train_scaled
+rf_y_pred = rf_classifier.predict(X_test_scaled)  # Use X_test_scaled instead of X_train_scaled
 
 # Evaluating the model
 rf_accuracy = accuracy_score(y_test, rf_y_pred)  # Use y_test instead of y_train
@@ -135,7 +135,7 @@ rf_conf_matrix = confusion_matrix(y_test, rf_y_pred)  # Use y_test instead of y_
 lr_param_grid = {
     'C': [10,20,100],
     'tol': [0.001,0.0001,0.0001] ,
-    'max_iter': [50,100,200],
+    'max_iter': [100,200,1000],
     'solver': ['saga'],
     'penalty': ['l1','l2'],
     'class_weight': ['balanced',None],
@@ -148,10 +148,10 @@ lr_grid_search.fit(X_train_scaled, y_train)
 # Best hyperparameters for Logistic Regression
 best_lr_params = lr_grid_search.best_params_
 '''
-best_lr_classifier = LogisticRegression(C=20, penalty='l2', solver='saga', max_iter=200, class_weight='balanced', tol=0.0001)
-best_lr_classifier.fit(X_train_scaled, y_train)
+lr_classifier = LogisticRegression(C=20, penalty='l2', solver='saga', max_iter=1000, class_weight='balanced', tol=0.0001)
+lr_classifier.fit(X_train_scaled, y_train)
 
-lr_y_pred = best_lr_classifier.predict(X_test_scaled)
+lr_y_pred = lr_classifier.predict(X_test_scaled)
 
 lr_accuracy = accuracy_score(y_test, lr_y_pred)
 lr_conf_matrix = confusion_matrix(y_test, lr_y_pred)
@@ -168,14 +168,15 @@ grid_search = GridSearchCV(estimator=svm_classifier, param_grid=param_grid, cv=1
 grid_search.fit(X_train_scaled, y_train)
 
 # Best hyperparameters
+C=20, kernel='rbf', gamma=1
 best_params = grid_search.best_params_
 '''
 # Model with best hyperparameters
-best_svm_classifier = SVC(C=20, kernel='rbf', gamma=1)
-best_svm_classifier.fit(X_train_scaled, y_train)
+svm_classifier = SVC(C=20,kernel='rbf')
+svm_classifier.fit(X_train_scaled, y_train)
 
 # Predictions
-svm_y_pred = best_svm_classifier.predict(X_test_scaled)
+svm_y_pred = svm_classifier.predict(X_test_scaled)
 
 # Evaluating the model
 accuracy = accuracy_score(y_test, svm_y_pred)
@@ -267,7 +268,6 @@ class FirstWindow:
 
         FourthWindow(fourth_window, data1)
 
-
 class SecondWindow:
     def __init__(self, eroot):
         self.root = eroot
@@ -350,7 +350,6 @@ class SecondWindow:
     def Knn_info():
         messagebox.showinfo("KNN \n",
                             f"Accuracy: {knn_accuracy:.2f}\nConfusion Matrix:\n{knn_conf_matrix}")
-
 
 class ThirdWindow:
     def __init__(self, eroot):
@@ -459,7 +458,7 @@ class ThirdWindow:
         array_svm = np.array(input_svm).reshape(1, -1)
         input_interaction_svm = poly.transform(array_svm)
         input_scaled_svm = scaler.transform(input_interaction_svm)
-        prediction = best_svm_classifier.predict(input_scaled_svm)
+        prediction = svm_classifier.predict(input_scaled_svm)
         return prediction
 
     def predict_decision_tree(self, input_data):
@@ -467,7 +466,7 @@ class ThirdWindow:
         input_array = np.array(input_values).reshape(1, -1)
         input_interaction = poly.transform(input_array)
         input_scaled = scaler.transform(input_interaction)
-        prediction = best_dt_classifier.predict(input_scaled)
+        prediction = dt_classifier.predict(input_scaled)
         return prediction
     def predict_Knn(self, input_data):
         input_values = [float(input_data[key]) for key in self.variable_names]
@@ -481,7 +480,7 @@ class ThirdWindow:
         input_array = np.array(input_values).reshape(1, -1)
         input_interaction = poly.transform(input_array)
         input_scaled = scaler.transform(input_interaction)
-        prediction = best_rf_classifier.predict(input_scaled)
+        prediction = rf_classifier.predict(input_scaled)
         return prediction
 
     def predict_logistic_regression(self, input_data):
@@ -489,7 +488,7 @@ class ThirdWindow:
         input_array = np.array(input_values).reshape(1, -1)
         input_interaction = poly.transform(input_array)
         input_scaled = scaler.transform(input_interaction)
-        prediction = best_lr_classifier.predict(input_scaled)
+        prediction = lr_classifier.predict(input_scaled)
         return prediction
 
 
@@ -570,11 +569,18 @@ class FourthWindow:
     def display_preprocess_info(self):
         preprocess_info = """
         Data Preprocessing Summary:
-        - Handling missing values: Replaced null values with median for 'ph', 'Sulfate', and 'Trihalomethanes'.
+        - Handling missing values: Replaced null values with mean for 'ph', 'Sulfate', and 'Trihalomethanes'.
+        - Feature Scaling: Applied StandardScaler to normalize features.
+        - Polynomial Features: Created interaction terms up to degree 2 using PolynomialFeatures.
+        - Class Balancing: Addressed class imbalance by up-sampling the minority class.
+        - Outlier Handling: Checked for and handled outliers in the dataset.
+        - Feature Selection: Considered relevant features for modeling.
+        - Data Splitting: Split the data into training and testing subsets.
         """
+
         # Create a new window to display the preprocessing information
         preprocess_window = tk.Toplevel(self.root)
-        preprocess_window.geometry("800x600")
+        preprocess_window.geometry("600x400")
         preprocess_window.title("Data Preprocessing Summary")
         preprocess_window.configure(bg="#00203F")
 

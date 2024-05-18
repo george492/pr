@@ -23,6 +23,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score, confusion_matrix
 from sklearn.svm import SVC
+import warnings
 from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
@@ -471,6 +472,7 @@ class ThirdWindow:
         input_scaled = scaler.transform(input_interaction)
         prediction = lr_classifier.predict(input_scaled)
         return prediction
+warnings.filterwarnings("ignore", message=".*does not have valid feature names, but PolynomialFeatures was fitted with feature names.*")
 
 class FourthWindow:
     def __init__(self, eroot, dData):

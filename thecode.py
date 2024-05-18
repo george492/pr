@@ -7,7 +7,6 @@ import random
 import tkinter.messagebox as messagebox
 import plotly.express as px
 from sklearn.linear_model import LogisticRegression
-
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from sklearn.impute import SimpleImputer
 from sklearn.model_selection import train_test_split
@@ -17,7 +16,6 @@ from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import confusion_matrix
-
 from sklearn.metrics import confusion_matrix, accuracy_score
 from imblearn.over_sampling import RandomOverSampler
 from sklearn.utils import resample
@@ -39,41 +37,33 @@ from sklearn.utils import shuffle
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import GridSearchCV
-
-# Load the dataset
+# preprocessing
 data1 = pd.read_csv("water_potability - water_potability.csv.csv")
 
-# Data Preprocessing
-
-# Handling Missing Values
 imputer = SimpleImputer(strategy='mean')
 data = pd.DataFrame(imputer.fit_transform(data1), columns=data1.columns)
 
-# Removing Duplicate Rows
 data.drop_duplicates(inplace=True)
 
-# Handling Class Imbalance (Up-sampling Minority Class)
 majority_class = data[data['Potability'] == 0]
 minority_class = data[data['Potability'] == 1]
 minority_upsampled = minority_class.sample(n=len(majority_class), replace=True, random_state=42)
 data = pd.concat([majority_class, minority_upsampled])
 
-# Feature Engineering - Interaction Terms
 poly = PolynomialFeatures(degree=2, include_bias=False, interaction_only=True)
 X_interaction = poly.fit_transform(data.drop('Potability', axis=1))
 
-# Feature Selection
 y = data['Potability']
-
-# Splitting into Training and Testing Sets
 X_train, X_test, y_train, y_test = train_test_split(X_interaction, y, test_size=0.2, random_state=42)
 
-# Feature Scaling
 scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train)
 X_test_scaled = scaler.transform(X_test)
 interaction_poly = PolynomialFeatures(degree=2, include_bias=False, interaction_only=False)
 X_interaction = interaction_poly.fit_transform(data.drop('Potability', axis=1))
+
+#gridsearch for DT
+
 '''
 dt_classifier = DecisionTreeClassifier(random_state=42)
 dt_param_grid = {
@@ -83,25 +73,24 @@ dt_param_grid = {
     'min_samples_leaf': [1,2,3],
 }
 
-# Hyperparameter tuning for Decision Tree
 dt_grid_search = GridSearchCV(estimator=dt_classifier, param_grid=dt_param_grid, cv=20, scoring='accuracy')
 dt_grid_search.fit(X_train_scaled, y_train)
 
 # Best hyperparameters for Decision Tree
 best_dt_params = dt_grid_search.best_params_
 '''
-# Model with best hyperparameters
+
+# DT Model with best hyperparameters
 dt_classifier = DecisionTreeClassifier(max_depth=40, criterion='entropy', min_samples_split=2, min_samples_leaf=1, random_state=42)
 dt_classifier.fit(X_train_scaled, y_train)
 
-# Predictions
 dt_y_pred = dt_classifier.predict(X_test_scaled)
 
-# Evaluating the model
 dt_accuracy = accuracy_score(y_test, dt_y_pred)
 dt_conf_matrix = confusion_matrix(y_test, dt_y_pred)
+
 '''
-# Model Selection - Random Forest Classifier
+# Grid search model Random Forest Classifier
 rf_classifier = RandomForestClassifier(random_state=42)
 rf_param_grid = {
     'n_estimators': [1000,1100,1200,1300,1400],
@@ -113,25 +102,23 @@ rf_param_grid = {
     'bootstrap': [False,True]  
 }
 
-# Hyperparameter tuning for Random Forest
 rf_grid_search = GridSearchCV(estimator=rf_classifier, param_grid=rf_param_grid, cv=10, scoring='accuracy')
 rf_grid_search.fit(X_train_scaled, y_train)
 
-# Best hyperparameters for Random Forest
 best_rf_params = rf_grid_search.best_params_
 '''
-# Model with best hyperparameters
+#  Random Forest model with the Best hyperparameters
 rf_classifier = RandomForestClassifier(n_estimators=1400, max_depth=20, min_samples_split=2, min_samples_leaf=2, class_weight='balanced', criterion='gini', bootstrap=False, random_state=42)
 rf_classifier.fit(X_train_scaled, y_train)
 
-# Predictions
 rf_y_pred = rf_classifier.predict(X_test_scaled)  # Use X_test_scaled instead of X_train_scaled
 
-# Evaluating the model
 rf_accuracy = accuracy_score(y_test, rf_y_pred)  # Use y_test instead of y_train
 rf_conf_matrix = confusion_matrix(y_test, rf_y_pred)  # Use y_test instead of y_train
 
 '''
+# grid search for logestic regression
+
 lr_param_grid = {
     'C': [10,20,100],
     'tol': [0.001,0.0001,0.0001] ,
@@ -145,9 +132,9 @@ lr_classifier = LogisticRegression()
 lr_grid_search = GridSearchCV(estimator=lr_classifier, param_grid=lr_param_grid, cv=20, scoring='accuracy')
 lr_grid_search.fit(X_train_scaled, y_train)
 
-# Best hyperparameters for Logistic Regression
 best_lr_params = lr_grid_search.best_params_
 '''
+# best hyperparameters for logestic regression
 lr_classifier = LogisticRegression(C=20, penalty='l2', solver='saga', max_iter=1000, class_weight='balanced', tol=0.0001)
 lr_classifier.fit(X_train_scaled, y_train)
 
@@ -157,7 +144,7 @@ lr_accuracy = accuracy_score(y_test, lr_y_pred)
 lr_conf_matrix = confusion_matrix(y_test, lr_y_pred)
 
 '''
-# Hyperparameter tuning for SVM
+# grid search for SVM
 param_grid = {
 'C': [10, 20, 100],
 'kernel': ['linear', 'rbf', 'poly', 'sigmoid'],
@@ -167,56 +154,44 @@ svm_classifier = SVC()
 grid_search = GridSearchCV(estimator=svm_classifier, param_grid=param_grid, cv=10, scoring='accuracy')
 grid_search.fit(X_train_scaled, y_train)
 
-# Best hyperparameters
-C=20, kernel='rbf', gamma=1
 best_params = grid_search.best_params_
 '''
-# Model with best hyperparameters
+# svm  Model with best hyperparameters
 svm_classifier = SVC(C=20,kernel='rbf')
 svm_classifier.fit(X_train_scaled, y_train)
 
-# Predictions
 svm_y_pred = svm_classifier.predict(X_test_scaled)
 
-# Evaluating the model
 accuracy = accuracy_score(y_test, svm_y_pred)
 conf_matrix = confusion_matrix(y_test, svm_y_pred)
 
 '''
-# Define the hyperparameter grid
+# KNN model grid search
 param_grid = {
     'n_neighbors': [3, 5, 7, 9],
     'weights': ['uniform', 'distance'],
 }
 
-# Initialize KNN classifier
 knn_classifier = KNeighborsClassifier()
 
-# Initialize GridSearchCV
 grid_search = GridSearchCV(estimator=knn_classifier, param_grid=param_grid, cv=5, scoring='accuracy')
 
-# Perform Grid Search to find the best hyperparameters
 grid_search.fit(X_train_scaled, y_train)
 
-# Get the best hyperparameters
 best_params = grid_search.best_params_
 print("Best Hyperparameters:", best_params)
-
-# Predict on the scaled testing data using the best model
-best_knn = grid_search.best_estimator_
-y_pred = best_knn.predict(X_test_scaled)
 '''
+#best hyperparameters for knn
 knn_classifier = KNeighborsClassifier(n_neighbors=9, weights='distance')
 
-# Train the classifier on the scaled training data
 knn_classifier.fit(X_train_scaled, y_train)
 
-# Predict on the scaled testing data
 knn_y_pred = knn_classifier.predict(X_test_scaled)
 
-# Calculate accuracy
 knn_accuracy = accuracy_score(y_test, knn_y_pred)
 knn_conf_matrix = confusion_matrix(y_test, knn_y_pred)
+
+#gui
 
 class FirstWindow:
     def __init__(self, eroot):

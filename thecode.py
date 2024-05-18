@@ -191,8 +191,8 @@ knn_y_pred = knn_classifier.predict(X_test_scaled)
 knn_accuracy = accuracy_score(y_test, knn_y_pred)
 knn_conf_matrix = confusion_matrix(y_test, knn_y_pred)
 
-#gui
 
+# Tkinter GUI
 class FirstWindow:
     def __init__(self, eroot):
         self.root = eroot
@@ -250,16 +250,16 @@ class SecondWindow:
         self.root.title("Water Potability Models")
         self.root.configure(bg="#00203F")
 
-        self.checkbox1 = tk.Checkbutton(self.root, text="DT", command=self.dt_info)
-        self.checkbox1.config(width=10, height=2)
-        self.checkbox2 = tk.Checkbutton(self.root, text="LR", command=self.lr_info)
-        self.checkbox2.config(width=10, height=2)
-        self.checkbox3 = tk.Checkbutton(self.root, text="SVM", command=self.svm_info)
-        self.checkbox3.config(width=10, height=2)
-        self.checkbox4 = tk.Checkbutton(self.root, text="RF", command=self.rf_info)
-        self.checkbox4.config(width=10, height=2)
-        self.checkbox5 = tk.Checkbutton(self.root, text="KNN", command=self.Knn_info)
-        self.checkbox5.config(width=10, height=2)
+        self.checkbox1 = tk.Checkbutton(self.root, bg="#ADEFD1", text="DT", command=self.dt_info)
+        self.checkbox1.config(width=10, height=1)
+        self.checkbox2 = tk.Checkbutton(self.root, bg="#ADEFD1", text="LR", command=self.lr_info)
+        self.checkbox2.config(width=10, height=1)
+        self.checkbox3 = tk.Checkbutton(self.root, bg="#ADEFD1", text="SVM", command=self.svm_info)
+        self.checkbox3.config(width=10, height=1)
+        self.checkbox4 = tk.Checkbutton(self.root, bg="#ADEFD1", text="RF", command=self.rf_info)
+        self.checkbox4.config(width=10, height=1)
+        self.checkbox5 = tk.Checkbutton(self.root, bg="#ADEFD1", text="KNN", command=self.Knn_info)
+        self.checkbox5.config(width=10, height=1)
 
         self.checkbox1.bind("<Enter>", lambda e: self.checkbox1.config(bg="lightblue"))
         self.checkbox1.bind("<Leave>", lambda e: self.checkbox1.config(bg="#ADEFD1"))
@@ -272,6 +272,9 @@ class SecondWindow:
 
         self.checkbox4.bind("<Enter>", lambda e: self.checkbox4.config(bg="lightblue"))
         self.checkbox4.bind("<Leave>", lambda e: self.checkbox4.config(bg="#ADEFD1"))
+
+        self.checkbox5.bind("<Enter>", lambda e: self.checkbox5.config(bg="lightblue"))
+        self.checkbox5.bind("<Leave>", lambda e: self.checkbox5.config(bg="#ADEFD1"))
 
         self.open_models_button1 = tk.Button(self.root, bg="#ADEFD1", text="Prediction(Sample Entry)",
                                              command=self.open_third_window)
@@ -321,6 +324,7 @@ class SecondWindow:
     def rf_info():
         messagebox.showinfo("Random forest \n",
                             f"Accuracy: {rf_accuracy:.2f}\nConfusion Matrix:\n{rf_conf_matrix}")
+
     @staticmethod
     def Knn_info():
         messagebox.showinfo("KNN \n",
@@ -338,8 +342,8 @@ class ThirdWindow:
         for option in self.options:
             radiobutton = tk.Radiobutton(self.root, bg="#ADEFD1", text=option,
                                          variable=self.selected_option, value=option)
-            radiobutton.config(width=15, height=2)
-            radiobutton.pack(pady=10)
+            radiobutton.config(width=15, height=1)
+            radiobutton.pack(pady=5)
 
         tk.Label(self.root, text="", bg="#00203F").pack()
 
@@ -414,7 +418,7 @@ class ThirdWindow:
                 prediction = self.predict_random_forest(mydata)
             elif self.selected_option.get() == "Knn":
                 prediction = self.predict_Knn(mydata)
-            messagebox.showinfo("Prediction", f"Prediction: {int(prediction[0])}")
+            messagebox.showinfo("Prediction", f"Prediction: {prediction}")
         else:
             messagebox.showerror("Error", "Please select one option.")
 
@@ -443,6 +447,7 @@ class ThirdWindow:
         input_scaled = scaler.transform(input_interaction)
         prediction = dt_classifier.predict(input_scaled)
         return prediction
+
     def predict_Knn(self, input_data):
         input_values = [float(input_data[key]) for key in self.variable_names]
         input_array = np.array(input_values).reshape(1, -1)
@@ -450,6 +455,7 @@ class ThirdWindow:
         input_scaled = scaler.transform(input_interaction)
         prediction = knn_classifier.predict(input_scaled)
         return prediction
+
     def predict_random_forest(self, input_data):
         input_values = [float(input_data[key]) for key in self.variable_names]
         input_array = np.array(input_values).reshape(1, -1)
@@ -466,16 +472,19 @@ class ThirdWindow:
         prediction = lr_classifier.predict(input_scaled)
         return prediction
 
-
 class FourthWindow:
-    def __init__(self, eroot, data):
+    def __init__(self, eroot, dData):
         self.root = eroot
-        self.root.geometry("1200x1000")
+        self.root.geometry("1000x8000")
         self.root.title("Exploratory Data Analysis and Data Preprocessing")
         self.root.configure(bg="#00203F")
 
         self.eda_button = tk.Button(self.root, bg="#ADEFD1", text="EDA Information", command=self.display_eda_info)
-        self.eda_button.pack(pady=10)
+        self.eda_button.pack(pady=20)
+
+        self.visualise_button = tk.Button(self.root, bg="#ADEFD1", text="Data Visualization Information",
+                                          command=self.display_visual_info)
+        self.visualise_button.pack(pady=20)
 
         self.preprocess_button = tk.Button(self.root, bg="#ADEFD1", text="Data Preprocessing Summary",
                                            command=self.display_preprocess_info)
@@ -485,36 +494,52 @@ class FourthWindow:
                                        command=self.open_first_window)
         self.return_button.pack(side="bottom", anchor="center", pady=(0, 30))
 
-        self.data = data
+        self.data = dData
+
+    def display_visual_info(self):
+        # Create a new window to display the EDA information
+        visual_window = tk.Toplevel(self.root)
+        visual_window.geometry("1000x800")
+        visual_window.title(" Data Analysis Information")
+        visual_window.configure(bg="#00203F")
+
+        # Display the information
+        info_text = """
+            Data Analysis Summary
+            - Basic statistics of the dataset:
+
+            """
+
+        info_text += "Shape of The DataSet\n\n"
+        info_text += str(self.data.shape) + "\n\n"
+
+        info_text += "Data Types of the Features\n\n"
+        info_text += str(self.data.dtypes) + "\n\n"
+
+        info_text += "Sum of Null Values for each Feature\n\n"
+        info_text += str(self.data.isnull().sum()) + "\n\n"
+
+        info_text += "\n\nSum of Duplicated Values in the Dataset: " + str(self.data.duplicated().sum()) + "\n\n"
+
+        # Display the potability percentage
+        potable_percentage = self.data.Potability[
+                                 self.data.Potability == 1].count() / self.data.Potability.count() * 100
+        not_potable_percentage = self.data.Potability[
+                                     self.data.Potability == 0].count() / self.data.Potability.count() * 100
+
+        info_text += f"{potable_percentage:.2f} % of samples are potable (1)\n\n"
+        info_text += f"{not_potable_percentage:.2f} % of samples are not potable (0)\n\n"
+
+        # Add a Text widget to display the information
+        info_label = tk.Label(visual_window, text=info_text, justify=tk.LEFT)
+        info_label.pack(expand=True, fill=tk.BOTH)
 
     def display_eda_info(self):
         # Create a new window to display the EDA information
         eda_window = tk.Toplevel(self.root)
-        eda_window.geometry("800x600")
+        eda_window.geometry("1000x800")
         eda_window.title("Exploratory Data Analysis (EDA) Information")
         eda_window.configure(bg="#00203F")
-
-        # Display the information
-        info_text = """
-        Exploratory Data Analysis (EDA) Summary:
-        - Basic statistics of the dataset:
-        """
-        info_text += str(self.data.head()) + "\n"
-
-        info_text += "Shape of The DataSet\n"
-        info_text += str(self.data.shape) + "\n"
-
-        info_text += "Data Types of the Features\n"
-        info_text += str(self.data.dtypes) + "\n"
-
-        info_text += "Sum of Null Values for each Feature\n"
-        info_text += str(self.data.isnull().sum()) + "\n"
-
-        info_text += "\nSum of Duplicated Values in the Dataset: " + str(self.data.duplicated().sum()) + "\n"
-
-        # Display the potability percentage
-        potable_percentage = self.data.Potability[self.data.Potability == 1].count() / self.data.Potability.count() * 100
-        info_text += f"{potable_percentage:.2f} % of samples are potable (1)\n"
 
         # Create a figure and subplots for count plot and heatmap
         fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(8, 10))
@@ -538,19 +563,30 @@ class FourthWindow:
         canvas.get_tk_widget().pack()
 
         # Add a Text widget to display the information
-        info_label = tk.Label(eda_window, text=info_text, justify=tk.LEFT)
+        info_label = tk.Label(eda_window, justify=tk.LEFT)
         info_label.pack(expand=True, fill=tk.BOTH)
 
     def display_preprocess_info(self):
         preprocess_info = """
         Data Preprocessing Summary:
-        - Handling missing values: Replaced null values with mean for 'ph', 'Sulfate', and 'Trihalomethanes'.
-        - Feature Scaling: Applied StandardScaler to normalize features.
-        - Polynomial Features: Created interaction terms up to degree 2 using PolynomialFeatures.
-        - Class Balancing: Addressed class imbalance by up-sampling the minority class.
-        - Outlier Handling: Checked for and handled outliers in the dataset.
-        - Feature Selection: Considered relevant features for modeling.
-        - Data Splitting: Split the data into training and testing subsets.
+
+        - Handling Missing Values:
+            - Replaced missing values with the mean of the respective columns.
+
+        - Removing Duplicate Rows:
+            - Dropped duplicate rows to ensure data quality.
+
+        - Handling Class Imbalance:
+            - Used up-sampling to balance the minority class (Potability = 1) with the majority class (Potability = 0).
+
+        - Feature Engineering:
+            - Created interaction terms using PolynomialFeatures (degree=2, interaction_only=True).
+
+        - Feature Scaling:
+            - Applied StandardScaler to normalize the features.
+
+        - Data Splitting:
+            - Split the data into training and testing sets (80% train, 20% test).
         """
 
         # Create a new window to display the preprocessing information
@@ -570,7 +606,6 @@ class FourthWindow:
 
     def run(self):
         self.root.mainloop()
-
 
 if __name__ == "__main__":
     root = tk.Tk()
